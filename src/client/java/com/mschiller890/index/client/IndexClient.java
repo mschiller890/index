@@ -17,7 +17,7 @@ public class IndexClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		openSearchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-				"key.index.open_search",
+				"[index] Open Search screen",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_RIGHT_SHIFT,
 				KeyMapping.Category.MISC

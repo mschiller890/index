@@ -24,14 +24,13 @@ public class SearchForItemScreen extends Screen {
     private static final int MAX_RESULTS = 200;
 
     private EditBox searchBox;
-    private Checkbox listCheckbox;
+//    private Checkbox listCheckbox;
     private ResultList results;
 
     private final Map<Item, ItemStack> savedItems = new LinkedHashMap<>();
 
     private int titleY;
     private int centerX;
-
 
     public SearchForItemScreen(Component title) {
         super(title);
@@ -150,9 +149,9 @@ public class SearchForItemScreen extends Screen {
 
         for (ItemStack stack : matches) {
             results.add(stack, false);
-            if (listCheckbox.selected()) {
-                savedItems.putIfAbsent(stack.getItem(), stack);
-            }
+//            if (listCheckbox.selected()) {
+//                savedItems.putIfAbsent(stack.getItem(), stack);
+//            }
         }
     }
 
