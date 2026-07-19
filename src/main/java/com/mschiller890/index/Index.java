@@ -22,6 +22,7 @@ public class Index implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("index is running!");
 	}
 
 	public static Identifier id(String path) {
