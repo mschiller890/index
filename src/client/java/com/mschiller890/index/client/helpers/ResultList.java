@@ -3,6 +3,7 @@ package com.mschiller890.index.client.helpers;
 import com.mschiller890.index.client.screens.SearchForItemScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -49,13 +50,18 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
     public static class Entry extends ObjectSelectionList.Entry<Entry> {
 
         private final ItemStack stack;
-        private boolean checked;
+        private final Checkbox checkbox;
         private final ResultList parent;
 
         public Entry(ItemStack stack, boolean checked, ResultList parent) {
             this.stack = stack;
-            this.checked = checked;
+//            this.checked = checked;
             this.parent = parent;
+
+            this.checkbox = Checkbox.builder(Component.empty(), Minecraft.getInstance().font)
+                    .selected(checked)
+                    .onValueChange((box,value) -> {})
+                    .build();
         }
 
         @Override
@@ -76,16 +82,21 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
                     0xFFFFFFFF
             );
 
-            int boxSize = 9;
-            int boxX = this.getContentRight() - boxSize;
-            int boxY = this.getContentYMiddle() - boxSize / 2;
+//            int boxSize = 9;
+            int boxX = this.getContentRight() - checkbox.getWidth();
+                                                                        // i hate how i cant align the checkbox perfectly
+            int boxY = this.getContentYMiddle() - (checkbox.getHeight() /*+ 1*/) / 2;
 
-            graphics.fill(boxX, boxY, boxX + boxSize, boxY + boxSize, 0xFFFFFFFF);
-            graphics.fill(boxX + 1, boxY + 1, boxX + boxSize - 1, boxY + boxSize - 1, 0xFF000000);
+//            graphics.fill(boxX, boxY, boxX + boxSize, boxY + boxSize, 0xFFFFFFFF);
+//            graphics.fill(boxX + 1, boxY + 1, boxX + boxSize - 1, boxY + boxSize - 1, 0xFF000000);
+//
+//            if (checked) {
+//                graphics.fill(boxX + 2, boxY + 2, boxX + boxSize - 2, boxY + boxSize - 2, 0xFF00AA00);
+//            }
 
-            if (checked) {
-                graphics.fill(boxX + 2, boxY + 2, boxX + boxSize - 2, boxY + boxSize - 2, 0xFF00AA00);
-            }
+            checkbox.setX(boxX);
+            checkbox.setY(boxY);
+            checkbox.extractRenderState(graphics, mouseX, mouseY, delta);
         }
 
         @Override
@@ -93,7 +104,10 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
                 net.minecraft.client.input.MouseButtonEvent event,
                 boolean doubleClick
         ) {
-            checked = !checked;
+//            checked = !checked;
+            if(checkbox.mouseClicked(event, doubleClick)) {
+                return true;
+            }
             return super.mouseClicked(event, doubleClick);
         }
 
@@ -102,7 +116,7 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
         }
 
         public boolean isChecked() {
-            return checked;
+            return checkbox.selected();
         }
 
         @Override
