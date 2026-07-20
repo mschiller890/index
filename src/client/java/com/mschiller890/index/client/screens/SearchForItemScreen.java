@@ -4,7 +4,6 @@ import com.mschiller890.index.client.helpers.ResultList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,7 +23,7 @@ public class SearchForItemScreen extends Screen {
     private static final int MAX_RESULTS = 200;
 
     private EditBox searchBox;
-//    private Checkbox listCheckbox;
+    //    private Checkbox listCheckbox;
     private ResultList results;
 
     private final Map<Item, ItemStack> savedItems = new LinkedHashMap<>();
@@ -74,27 +73,24 @@ public class SearchForItemScreen extends Screen {
                 this.width,
                 listHeight,
                 listTop,
-                20
+                20,
+                (stack, checked) -> {
+                    if (checked) {
+                        savedItems.put(stack.getItem(), stack.copy());
+                    } else {
+                        savedItems.remove(stack.getItem());
+                    }
+                }
         );
         this.addRenderableWidget(results);
-
-        /*
-         * SEARCH BUTTON
-         */
-        Button searchButton = Button.builder(
-                        Component.literal("Search"),
-                        ignored -> performSearch()
-                )
-                .bounds(centerX - 50, centerY + 80, 100, 20)
-                .build();
-        this.addRenderableWidget(searchButton);
 
         /*
          * SEARCH LIST BUTTON
          */
         Button searchListButton = Button.builder(
                         Component.literal("Search list"),
-                        ignored -> searchSavedList()
+//                        ignored -> searchSavedList()
+                        ignored -> Minecraft.getInstance().gui.setScreen(new SearchListScreen(Component.literal("Search List"), this, savedItems))
                 )
                 .bounds(10, this.height - 30, 80, 20)
                 .build();
@@ -112,7 +108,7 @@ public class SearchForItemScreen extends Screen {
                 )
                 .bounds(95, this.height - 30, 80, 20)
                 .build();
-        this.addRenderableWidget(clearListButton);
+        // this.addRenderableWidget(clearListButton);
 
         /*
          * CANCEL BUTTON
@@ -148,7 +144,7 @@ public class SearchForItemScreen extends Screen {
         }
 
         for (ItemStack stack : matches) {
-            results.add(stack, false);
+            results.add(stack, savedItems.containsKey(stack.getItem()));
 //            if (listCheckbox.selected()) {
 //                savedItems.putIfAbsent(stack.getItem(), stack);
 //            }
@@ -156,17 +152,17 @@ public class SearchForItemScreen extends Screen {
     }
 
 
-    private void searchSavedList() {
-        String query = searchBox.getValue().trim().toLowerCase(Locale.ROOT);
-        results.clearResults();
-
-        for (ItemStack stack : savedItems.values()) {
-            String name = stack.getHoverName().getString().toLowerCase(Locale.ROOT);
-            if (query.isEmpty() || name.contains(query)) {
-                results.add(stack, false);
-            }
-        }
-    }
+//    private void searchSavedList() {
+//        String query = searchBox.getValue().trim().toLowerCase(Locale.ROOT);
+//        results.clearResults();
+//
+//        for (ItemStack stack : savedItems.values()) {
+//            String name = stack.getHoverName().getString().toLowerCase(Locale.ROOT);
+//            if (query.isEmpty() || name.contains(query)) {
+//                results.add(stack, false);
+//            }
+//        }
+//    }
 
 
     @Override

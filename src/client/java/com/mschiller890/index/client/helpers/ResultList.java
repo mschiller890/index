@@ -3,24 +3,57 @@ package com.mschiller890.index.client.helpers;
 import com.mschiller890.index.client.screens.SearchForItemScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.ItemStack;
 
 public class ResultList extends ObjectSelectionList<ResultList.Entry> {
 
-    private final SearchForItemScreen screen;
+    private static final int REMOVE_COLOR = 0xFF5555;
+
+    private final Screen screen;
+    private final EntryStyle entryStyle;
+    private final CheckedChangeListener checkedChangeListener;
 
     public ResultList(
-            SearchForItemScreen screen,
+            Screen screen,
             int width,
             int height,
             int y,
             int itemHeight
     ) {
+        this(screen, width, height, y, itemHeight, EntryStyle.CHECKBOX, null);
+    }
+
+    public ResultList(
+            Screen screen,
+            int width,
+            int height,
+            int y,
+            int itemHeight,
+            CheckedChangeListener checkedChangeListener
+    ) {
+        this(screen, width, height, y, itemHeight, EntryStyle.CHECKBOX, checkedChangeListener);
+    }
+
+    public ResultList(
+            Screen screen,
+            int width,
+            int height,
+            int y,
+            int itemHeight,
+            EntryStyle entryStyle,
+            CheckedChangeListener checkedChangeListener
+    ) {
         super(Minecraft.getInstance(), width, height, y, itemHeight);
         this.screen = screen;
+        this.entryStyle = entryStyle;
+        this.checkedChangeListener = checkedChangeListener;
     }
 
     @Override
@@ -47,21 +80,55 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
         return selected != null ? selected.getStack() : null;
     }
 
+    public enum EntryStyle {
+        CHECKBOX,
+        REMOVE_BUTTON
+    }
+
+    public interface CheckedChangeListener {
+        void onCheckedChanged(ItemStack stack, boolean checked);
+    }
+
     public static class Entry extends ObjectSelectionList.Entry<Entry> {
 
+        private static final int WIDGET_SIZE = 14;
+
         private final ItemStack stack;
-        private final Checkbox checkbox;
         private final ResultList parent;
+        private final AbstractWidget widget;
+        private boolean checked;
 
         public Entry(ItemStack stack, boolean checked, ResultList parent) {
             this.stack = stack;
-//            this.checked = checked;
             this.parent = parent;
+            this.checked = checked;
 
-            this.checkbox = Checkbox.builder(Component.empty(), Minecraft.getInstance().font)
-                    .selected(checked)
-                    .onValueChange((box,value) -> {})
-                    .build();
+            if (parent.entryStyle == EntryStyle.REMOVE_BUTTON) {
+                Component label = Component.literal("X")
+                        .withStyle(style -> style.withColor(TextColor.fromRgb(REMOVE_COLOR)));
+                this.widget = Button.builder(label, button -> remove())
+                        .bounds(0, 0, WIDGET_SIZE, WIDGET_SIZE)
+                        .build();
+            } else {
+                this.widget = Checkbox.builder(Component.empty(), Minecraft.getInstance().font)
+                        .selected(checked)
+                        .onValueChange((box, value) -> onCheckboxChanged(value))
+                        .build();
+            }
+        }
+
+        private void onCheckboxChanged(boolean value) {
+            this.checked = value;
+            if (parent.checkedChangeListener != null) {
+                parent.checkedChangeListener.onCheckedChanged(stack, value);
+            }
+        }
+
+        private void remove() {
+            this.checked = false;
+            if (parent.checkedChangeListener != null) {
+                parent.checkedChangeListener.onCheckedChanged(stack, false);
+            }
         }
 
         @Override
@@ -82,21 +149,12 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
                     0xFFFFFFFF
             );
 
-//            int boxSize = 9;
-            int boxX = this.getContentRight() - checkbox.getWidth();
-                                                                        // i hate how i cant align the checkbox perfectly
-            int boxY = this.getContentYMiddle() - (checkbox.getHeight() /*+ 1*/) / 2;
+            int boxX = this.getContentRight() - widget.getWidth();
+            int boxY = this.getContentYMiddle() - widget.getHeight() / 2;
 
-//            graphics.fill(boxX, boxY, boxX + boxSize, boxY + boxSize, 0xFFFFFFFF);
-//            graphics.fill(boxX + 1, boxY + 1, boxX + boxSize - 1, boxY + boxSize - 1, 0xFF000000);
-//
-//            if (checked) {
-//                graphics.fill(boxX + 2, boxY + 2, boxX + boxSize - 2, boxY + boxSize - 2, 0xFF00AA00);
-//            }
-
-            checkbox.setX(boxX);
-            checkbox.setY(boxY);
-            checkbox.extractRenderState(graphics, mouseX, mouseY, delta);
+            widget.setX(boxX);
+            widget.setY(boxY);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
 
         @Override
@@ -104,8 +162,7 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
                 net.minecraft.client.input.MouseButtonEvent event,
                 boolean doubleClick
         ) {
-//            checked = !checked;
-            if(checkbox.mouseClicked(event, doubleClick)) {
+            if (widget.mouseClicked(event, doubleClick)) {
                 return true;
             }
             return super.mouseClicked(event, doubleClick);
@@ -116,7 +173,7 @@ public class ResultList extends ObjectSelectionList<ResultList.Entry> {
         }
 
         public boolean isChecked() {
-            return checkbox.selected();
+            return checked;
         }
 
         @Override
