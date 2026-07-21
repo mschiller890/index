@@ -1,6 +1,9 @@
 package com.mschiller890.index.client.screens;
 
+import com.mschiller890.index.client.ChestColorPersistence;
 import com.mschiller890.index.client.helpers.ChestColorManager;
+import com.mschiller890.index.network.SetChestColorC2SPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -72,9 +75,8 @@ public class ColorChestScreen extends Screen {
                         );
 
                         ChestColorManager.setColor(targetPos, currentColor());
-
-                        com.mschiller890.index.client.ChestColorPersistence.saveActiveWorld();
-                    }
+                        ChestColorPersistence.saveActiveWorld();
+                        ClientPlayNetworking.send(new SetChestColorC2SPayload(targetPos, true));                    }
                     Minecraft.getInstance().gui.setScreen(null);
                 }
         )
