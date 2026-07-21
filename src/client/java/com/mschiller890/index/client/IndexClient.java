@@ -24,6 +24,8 @@ public class IndexClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		ChestColorPersistence.register();
+
 		openSearchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"[index] Open Search screen",
 				InputConstants.Type.KEYSYM,

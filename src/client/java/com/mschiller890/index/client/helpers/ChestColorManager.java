@@ -26,4 +26,17 @@ public class ChestColorManager {
     public static boolean hasColor(BlockPos pos) {
         return COLORS.containsKey(pos);
     }
+
+    public static Map<BlockPos, Integer> snapshot() {
+        return new HashMap<>(COLORS);
+    }
+
+    public static void clearAll() {
+        COLORS.clear();
+    }
+
+    public static void loadAll(Map<BlockPos, Integer> data) {
+        COLORS.clear();
+        COLORS.putAll(data);
+    }
 }

@@ -72,6 +72,8 @@ public class ColorChestScreen extends Screen {
                         );
 
                         ChestColorManager.setColor(targetPos, currentColor());
+
+                        com.mschiller890.index.client.ChestColorPersistence.saveActiveWorld();
                     }
                     Minecraft.getInstance().gui.setScreen(null);
                 }
