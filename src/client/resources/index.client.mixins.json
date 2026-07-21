@@ -3,7 +3,9 @@
 	"package": "com.mschiller890.index.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ExampleClientMixin"
+		"ExampleClientMixin",
+		"ChestRenderStateMixin",
+		"ChestRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

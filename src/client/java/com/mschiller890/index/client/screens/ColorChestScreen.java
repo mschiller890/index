@@ -66,12 +66,17 @@ public class ColorChestScreen extends Screen {
                 Component.literal("Apply color"),
                 ignored -> {
                     if (targetPos != null) {
+                        int color = currentColor();
+                        System.out.println(
+                                "Setting chest color at " + targetPos + " -> " + Integer.toHexString(color)
+                        );
+
                         ChestColorManager.setColor(targetPos, currentColor());
                     }
                     Minecraft.getInstance().gui.setScreen(null);
                 }
         )
-                .bounds(centerX-50, centerY + 40, 100,20)
+                .bounds(centerX-50, centerY + 60, 100,20)
                 .build();
         applyButton.active = targetPos != null;
         this.addRenderableWidget(applyButton);
@@ -129,13 +134,21 @@ public class ColorChestScreen extends Screen {
             int previewColor = currentColor();
             int centerX = this.width / 2;
             int centerY = this.height / 2;
-            graphics.text(
-                    this.font,
-                    Component.literal("███████████████████████"),
-                    centerX - 100,
-                    centerY + 20,
-                    previewColor
-            );
+//            graphics.text(
+//                    this.font,
+//                    Component.literal("███████████████████████"),
+//                    centerX - 100,
+//                    centerY + 20,
+//                    previewColor
+//            );
+
+            int x = centerX - 100;
+            int yx = centerY + 30;
+            int width = 200;
+            int height = 16;
+
+            graphics.fill(x,yx-2,x+width,yx+height, 0xFF000000);
+            graphics.fill(x+1, yx-1,x+width-1,yx+height-1,previewColor);
         }
     }
 
