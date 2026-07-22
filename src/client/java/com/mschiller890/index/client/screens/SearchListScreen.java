@@ -1,6 +1,8 @@
 package com.mschiller890.index.client.screens;
 
 import com.mschiller890.index.client.helpers.ResultList;
+import com.mschiller890.index.network.SearchItemsC2SPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -8,9 +10,12 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -89,7 +94,16 @@ public class SearchListScreen extends Screen {
          */
         Button searchButton = Button.builder(
                         Component.literal("Search for items in chests"),
-                        ignored -> {}
+                        ignored -> {
+                            List<Identifier> ids = new ArrayList<>();
+                            for (Item item : savedItems.keySet()) {
+                                ids.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item));
+                            }
+
+                            ClientPlayNetworking.send(
+                                    new SearchItemsC2SPayload(ids)
+                            );
+                        }
                 )
                 .bounds(centerX - 90, centerY + 80, 180, 20)
                 .build();

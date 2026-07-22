@@ -3,7 +3,8 @@
 	"package": "com.mschiller890.index.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"ChestBlockEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
