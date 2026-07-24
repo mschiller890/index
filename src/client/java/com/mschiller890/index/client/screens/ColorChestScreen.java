@@ -15,12 +15,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ColorChestScreen extends Screen {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("index/ColorChestScreen");
 
     private static final int TEXT_COLOR = 0xFFFFFFFF;
     private static final int MARGIN = 6;
     private static final int LINE_HEIGHT = 10;
+    private int titleY;
 
     private BlockPos targetPos;
 
@@ -43,6 +48,8 @@ public class ColorChestScreen extends Screen {
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
+
+        titleY = centerY - 100;
 
         int startingRed = 255;
         int startingGreen = 255;
@@ -70,13 +77,12 @@ public class ColorChestScreen extends Screen {
                 ignored -> {
                     if (targetPos != null) {
                         int color = currentColor();
-                        System.out.println(
-                                "Setting chest color at " + targetPos + " -> " + Integer.toHexString(color)
-                        );
+                        LOGGER.debug("Setting chest color at {} -> {}", targetPos, Integer.toHexString(color));
 
                         ChestColorManager.setColor(targetPos, currentColor());
                         ChestColorPersistence.saveActiveWorld();
-                        ClientPlayNetworking.send(new SetChestColorC2SPayload(targetPos, true));                    }
+                        ClientPlayNetworking.send(new SetChestColorC2SPayload(targetPos, true));
+                    }
                     Minecraft.getInstance().gui.setScreen(null);
                 }
         )
@@ -147,6 +153,14 @@ public class ColorChestScreen extends Screen {
             graphics.fill(x,yx-2,x+width,yx+height, 0xFF000000);
             graphics.fill(x+1, yx-1,x+width-1,yx+height-1,previewColor);
         }
+
+        graphics.text(
+                this.font,
+                this.title,
+                (this.width / 2) - (this.font.width(title) / 2),
+                titleY,
+                0xFFFFFFFF
+        );
     }
 
     @Override

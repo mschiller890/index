@@ -3,6 +3,8 @@ package com.mschiller890.index.client.helpers;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.selectors.dynamic.IResolvedDescriptor;
 
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ChestColorStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger("index/ChestColorStorage");
     private static final Path BASE_DIR = FabricLoader.getInstance().getGameDir().resolve("index").resolve("chest_colors");
 
     private ChestColorStorage() {}
@@ -37,7 +40,7 @@ public final class ChestColorStorage {
             Files.createDirectories(BASE_DIR);
             NbtIo.writeCompressed(root, resolveFile(worldId));
         } catch (IOException e) {
-            System.err.println("Could not save chest colors! " + e.getMessage());
+            LOGGER.error("Could not save chest colors for world '{}'!", worldId, e);
         }
     }
 
@@ -63,7 +66,7 @@ public final class ChestColorStorage {
             }
             ChestColorManager.loadAll(loaded);
         } catch (IOException e) {
-            System.err.println("Could not load chest colors! " + e.getMessage());
+            LOGGER.error("Could not load chest colors for world '{}'!", worldId, e);
             ChestColorManager.clearAll();
         }
     }

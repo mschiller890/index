@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -48,22 +49,34 @@ public class Index implements ModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(SetChestColorC2SPayload.TYPE, SetChestColorC2SPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearchItemsC2SPayload.TYPE, SearchItemsC2SPayload.CODEC);
 
+		LOGGER.info("Registered network payloads");
+
 		ServerPlayNetworking.registerGlobalReceiver(SearchItemsC2SPayload.TYPE, (payload, context) -> {
 			context.server().execute(() -> {
 				ServerPlayer player = context.player();
 				ServerLevel level = player.level();
 
-				Set<BlockPos> matches = new HashSet<>();
+				LOGGER.info("{} search for {} item(s)", player.getGameProfile().name(), payload.itemIds().size());
+
+				Map<BlockPos, Item> matches = new HashMap<>();
 				for (Identifier id : payload.itemIds()) {
 					Item item = BuiltInRegistries.ITEM.getValue(id);
-					if (item == null || item == Items.AIR) continue;
+					if (item == null || item == Items.AIR) {
+						LOGGER.warn("Ignored invalid item '{}'", id);
+						continue;
+					}
+
+					LOGGER.debug("Searching for '{}", id);
 
 					for (Map.Entry<BlockPos, Integer> entry : ChestItemTracker.findLocations(level, item)) {
-						matches.add(entry.getKey());
+						matches.putIfAbsent(entry.getKey(), item);
 					}
 				}
 
-				ChestSearchTracker.setSearch(player.getUUID(), matches);
+				LOGGER.info("Found {} matching chest(s) for {}", matches.size(), player.getGameProfile().name());
+
+				ChestSearchTracker.setSearch(player.getUUID(), matches.keySet());
+				ChestSearchMarkers.showMarkers(level, player, matches);
 			});
 		});
 
@@ -86,11 +99,15 @@ public class Index implements ModInitializer {
 
 			BlockPos pos = hitResult.getBlockPos();
 			ChestSearchTracker.markOpened(serverPlayer.getUUID(), pos);
+			ChestSearchMarkers.removeMarkerAt(serverPlayer.level(), serverPlayer, pos);
 			return InteractionResult.PASS;
 		});
 
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-				ChestSearchTracker.clear(handler.player.getUUID()));
+		{
+			ChestSearchTracker.clear(handler.player.getUUID());
+			ChestSearchMarkers.clearMarkers(handler.player.level(), handler.player);
+		});
 
 		ServerPlayNetworking.registerGlobalReceiver(SetChestColorC2SPayload.TYPE, (payload, context) -> {
 			context.server().execute(() -> {
@@ -116,6 +133,13 @@ public class Index implements ModInitializer {
 		ServerLevelEvents.LOAD.register((server, level) -> {
 			ColoredChestPositions data = level.getDataStorage().computeIfAbsent(ColoredChestPositions.TYPE);
 			ChestItemTracker.trackAll(level, data.all());
+
+			LOGGER.debug("Tracked {} colored chest(s) on level load for {}", data.all().size(), level.dimension().identifier().toString());
+		});
+
+		ServerLevelEvents.UNLOAD.register((server, level) -> {
+			ChestItemTracker.untrackLevel(level);
+			LOGGER.debug("Untracked chest index for unloaded level {}", level.dimension().identifier().toString());
 		});
 	}
 
