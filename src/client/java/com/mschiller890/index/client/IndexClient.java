@@ -42,7 +42,6 @@ public class IndexClient implements ClientModInitializer {
 		});
 
 		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
-//			Level level = Minecraft.getInstance().level;
 
 			if (!level.isClientSide()) {
 				return InteractionResult.PASS;
@@ -55,14 +54,6 @@ public class IndexClient implements ClientModInitializer {
 					GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
 			boolean shift =
 					GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS;
-
-//			boolean pressed = ctrl && shift && client.options.keyUse.isDown();
-//
-//			if (pressed && !wasPressed) {
-//				client.setScreenAndShow(new ColorChestScreen(Component.literal("Color Chest")));
-//			}
-//
-//			wasPressed = pressed;
 
 			if (!ctrl || !shift) {
 				return InteractionResult.PASS;

@@ -138,13 +138,6 @@ public class ColorChestScreen extends Screen {
             int previewColor = currentColor();
             int centerX = this.width / 2;
             int centerY = this.height / 2;
-//            graphics.text(
-//                    this.font,
-//                    Component.literal("███████████████████████"),
-//                    centerX - 100,
-//                    centerY + 20,
-//                    previewColor
-//            );
 
             int x = centerX - 100;
             int yx = centerY + 30;
